@@ -106,7 +106,6 @@ if uploaded_file:
                     "Entrada": entrada.strftime("%H:%M"),
                     "Salida": salida.strftime("%H:%M"),
                     "Feriado": "Sí" if es_feriado else "No",
-                    "Horas Trabajadas (decimal)": round(horas_trabajadas, 2),
                     "Horas Trabajadas (h:mm)": horas_a_horasminutos(horas_trabajadas),
                     "Horas Especiales": round(horas_especiales, 2),
                     "Descuento Inventario": descuento_inventario,
@@ -146,3 +145,4 @@ st.markdown("---")
 if st.button("🚪 Salir de la aplicación"):
     st.session_state.exit_app = True
     st.experimental_rerun()
+
