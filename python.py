@@ -38,7 +38,7 @@ if st.session_state.exit_app:
     st.success("La aplicación se ha cerrado correctamente. Puedes cerrar la pestaña.")
     st.stop()
 
-st.title(" 💼 Calculadora de Sueldos - Feriados por Día del Mes")
+st.title(" 💼 Calculadora de Sueldos - Feriados por Día del Mes222")
 
 st.markdown("** 📄 Descarga la plantilla de Excel, complétala y vuelve a subirla aquí:**")
 with open("plantilla_sueldos_feriados_dias.xlsx", "rb") as f:
