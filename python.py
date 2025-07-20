@@ -19,17 +19,11 @@ def calcular_horas_especiales(entrada_dt, salida_dt):
     return (fin_interseccion - inicio_interseccion).total_seconds() / 3600
 
 def horas_a_horasminutos(horas):
-    total_segundos = int(round(horas * 3600))
-    horas_int = total_segundos // 3600
-    minutos = (total_segundos % 3600) // 60
-    segundos = total_segundos % 60
-
-    if segundos >= 50:
-        minutos += 1
+    horas_int = int(horas)
+    minutos = int(round((horas - horas_int) * 60))
     if minutos >= 60:
         horas_int += minutos // 60
         minutos = minutos % 60
-
     return f"{horas_int}:{minutos:02d}"
 
 st.set_page_config(page_title="Calculadora de Sueldos", page_icon="💼")
