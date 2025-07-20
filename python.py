@@ -77,6 +77,11 @@ if uploaded_file:
                 if salida_dt < entrada_dt:
                     salida_dt += timedelta(days=1)
 
+                # ⚠️ Limitar la salida a las 22:00
+                limite_salida = entrada_dt.replace(hour=22, minute=0, second=0)
+                if salida_dt > limite_salida:
+                    salida_dt = limite_salida
+
                 horas_trabajadas = (salida_dt - entrada_dt).total_seconds() / 3600
                 horas_especiales = calcular_horas_especiales(entrada_dt, salida_dt)
                 horas_normales = horas_trabajadas - horas_especiales
