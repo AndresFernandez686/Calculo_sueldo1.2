@@ -1,0 +1,497 @@
+"""
+Módulo para procesamiento inteligente de PDFs
+Convierte PDFs con formatos diversos a estructura estándar para cálculo de sueldos
+"""
+import pandas as pd
+import re
+from datetime import datetime, timedelta
+from typing import List, Dict, Tuple, Optional
+import streamlit as st
+
+def procesar_pdf_a_dataframe(archivo_pdf) -> pd.DataFrame:
+    """
+    Procesa un archivo PDF y extrae datos de empleados y horarios
+    
+    Args:
+        archivo_pdf: Archivo PDF subido
+        
+    Returns:
+        DataFrame: Datos procesados en formato estándar
+    """
+    try:
+        # Aquí necesitaremos una librería como PyPDF2 o pdfplumber
+        # Por ahora simulo la extracción
+        texto_pdf = extraer_texto_pdf(archivo_pdf)
+        lineas = texto_pdf.split('\n')
+        
+        # Identificar estructura del PDF
+        estructura = analizar_estructura_pdf(lineas)
+        
+        # Extraer datos según la estructura identificada
+        datos_brutos = extraer_datos_segun_estructura(lineas, estructura)
+        
+        # Procesar datos inteligentemente
+        datos_procesados = procesar_datos_inteligente(datos_brutos)
+        
+        # Convertir a DataFrame estándar
+        df_final = convertir_a_dataframe_estandar(datos_procesados)
+        
+        return df_final
+        
+    except Exception as e:
+        st.error(f"Error procesando PDF: {str(e)}")
+        return pd.DataFrame()
+
+def extraer_texto_pdf(archivo_pdf) -> str:
+    """
+    Extrae texto del PDF usando pdfplumber
+    """
+    try:
+        # Importar pdfplumber dinámicamente
+        import pdfplumber
+        
+        texto_completo = ""
+        
+        with pdfplumber.open(archivo_pdf) as pdf:
+            for pagina in pdf.pages:
+                texto_pagina = pagina.extract_text()
+                if texto_pagina:
+                    texto_completo += texto_pagina + "\n"
+        
+        return texto_completo
+        
+    except ImportError:
+        st.warning("pdfplumber no está instalado. Usando datos de ejemplo.")
+        # Fallback con datos de ejemplo
+        return """
+        REPORTE DE ASISTENCIA - OCTUBRE 2024
+        
+        Empleado: Juan Pérez
+        01/10/2024 08:00 - Entrada
+        01/10/2024 17:00 - Salida
+        02/10/2024 08:30 - Entrada
+        02/10/2024 17:30 - Salida
+        
+        Empleado: María González  
+        01/10/2024 09:00 - Entrada
+        01/10/2024 18:00 - Salida
+        02/10/2024 08:45 - Entrada
+        02/10/2024 17:45 - Salida
+        
+        Empleado: Carlos López
+        01/10/2024 08:15 - Entrada
+        01/10/2024 17:15 - Salida
+        """
+        
+    except Exception as e:
+        st.error(f"Error extrayendo texto del PDF: {str(e)}")
+        return ""
+
+def analizar_estructura_pdf(lineas: List[str]) -> Dict:
+    """
+    Analiza la estructura del PDF para identificar patrones
+    
+    Args:
+        lineas: Lista de líneas del texto extraído
+        
+    Returns:
+        Dict: Información sobre la estructura identificada
+    """
+    estructura = {
+        "tipo": "desconocido",
+        "patron_empleado": None,
+        "patron_fecha_hora": None,
+        "columnas_detectadas": [],
+        "separador": None
+    }
+    
+    # Detectar patrones comunes
+    for linea in lineas:
+        linea = linea.strip()
+        if not linea:
+            continue
+            
+        # Patrón: Empleado: Nombre
+        if re.match(r'Empleado:', linea, re.IGNORECASE):
+            estructura["patron_empleado"] = "empleado_prefijo"
+            
+        # Patrón: Fecha y hora juntas (YYYY-MM-DD HH:MM:SS)
+        if re.search(r'\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}:\d{2}', linea):
+            estructura["patron_fecha_hora"] = "fecha_hora_completa"
+            
+        # Patrón: Fecha y hora juntas (YYYY-MM-DD HH:MM)
+        if re.search(r'\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}', linea):
+            estructura["patron_fecha_hora"] = "fecha_hora_separada"
+            
+        # Patrón: Fecha y hora juntas (DD/MM/YYYY HH:MM)
+        if re.search(r'\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}', linea):
+            estructura["patron_fecha_hora"] = "fecha_hora_barras"
+            
+        # Detectar si hay columnas tabulares
+        if '\t' in linea or '|' in linea or '  ' in linea:
+            estructura["tipo"] = "tabular"
+            
+    return estructura
+
+def extraer_datos_segun_estructura(lineas: List[str], estructura: Dict) -> List[Dict]:
+    """
+    Extrae datos según la estructura identificada usando el parser inteligente
+    """
+    from smart_parser import SmartTimeParser, EntradaSalidaDetector
+    
+    parser = SmartTimeParser()
+    detector = EntradaSalidaDetector()
+    
+    datos = []
+    empleado_actual = None
+    
+    # Buscar nombres en todo el documento primero
+    posibles_nombres = _buscar_nombres_en_documento(lineas)
+    
+    for i, linea in enumerate(lineas):
+        linea = linea.strip()
+        if not linea:
+            continue
+            
+        # Detectar nombre de empleado (varios patrones)
+        if re.match(r'Empleado:', linea, re.IGNORECASE):
+            empleado_actual = linea.split(':', 1)[1].strip()
+            continue
+        elif re.match(r'Nombre:', linea, re.IGNORECASE):
+            empleado_actual = linea.split(':', 1)[1].strip()
+            continue
+        elif re.match(r'^[A-ZÁÉÍÓÚ][a-záéíóú]+ [A-ZÁÉÍÓÚ][a-záéíóú]+.*$', linea):
+            # Patrón de nombre completo (Nombre Apellido)
+            if not any(char.isdigit() for char in linea) and len(linea.split()) >= 2:
+                empleado_actual = linea.strip()
+                continue
+        elif re.match(r'^[A-ZÁÉÍÓÚ][a-záéíóúñ]+$', linea):
+            # Patrón de nombre simple (solo una palabra, como "Paz")
+            if len(linea.strip()) >= 2 and linea.strip().isalpha():
+                empleado_actual = linea.strip()
+                continue
+        elif re.match(r'^[A-ZÁÉÍÓÚ][a-záéíóúñ]+\s*$', linea.strip()):
+            # Patrón de nombre con posibles espacios al final
+            nombre_limpio = linea.strip()
+            if len(nombre_limpio) >= 2 and nombre_limpio.isalpha():
+                empleado_actual = nombre_limpio
+                continue
+        
+        # Extraer fechas y horas de la línea
+        fechas_horas = parser.extraer_fecha_hora(linea)
+        
+        for fh in fechas_horas:
+            # Si no hay empleado actual, usar el primer nombre encontrado o "Empleado 1"
+            if not empleado_actual and posibles_nombres:
+                nombre_empleado = posibles_nombres[0]
+            else:
+                nombre_empleado = empleado_actual if empleado_actual else "Empleado 1"
+            
+            # Detectar tipo (entrada/salida)
+            contexto = lineas[max(0, i-2):i+3] if i > 0 else [linea]
+            tipo = detector.detectar_tipo(linea, fh['hora'], contexto)
+            
+            datos.append({
+                "empleado": nombre_empleado,
+                "fecha": fh['fecha'],
+                "hora": fh['hora'],
+                "tipo": tipo,
+                "linea_original": linea,
+                "confianza": _calcular_confianza(linea, fh)
+            })
+    
+    return datos
+
+def _buscar_nombres_en_documento(lineas: List[str]) -> List[str]:
+    """
+    Busca posibles nombres de empleados en todo el documento
+    """
+    nombres_encontrados = []
+    
+    for linea in lineas:
+        linea = linea.strip()
+        if not linea:
+            continue
+            
+        # Buscar patrones de nombres
+        # Nombre con "Nombre:" o "Empleado:"
+        if re.match(r'(Nombre|Empleado):', linea, re.IGNORECASE):
+            nombre = linea.split(':', 1)[1].strip()
+            if nombre and nombre not in nombres_encontrados:
+                nombres_encontrados.append(nombre)
+        
+        # Nombre simple (una palabra alfabética, primera letra mayúscula)
+        elif re.match(r'^[A-ZÁÉÍÓÚ][a-záéíóúñ]+$', linea):
+            if len(linea) >= 2 and linea not in nombres_encontrados:
+                # Evitar palabras que claramente no son nombres
+                palabras_excluir = ['Hora', 'Fecha', 'Entrada', 'Salida', 'Total', 'Reporte', 'Asistencia']
+                if linea not in palabras_excluir:
+                    nombres_encontrados.append(linea)
+        
+        # Nombre completo (dos o más palabras)
+        elif re.match(r'^[A-ZÁÉÍÓÚ][a-záéíóú]+ [A-ZÁÉÍÓÚ][a-záéíóú]+.*$', linea):
+            if not any(char.isdigit() for char in linea) and linea not in nombres_encontrados:
+                nombres_encontrados.append(linea)
+    
+    return nombres_encontrados
+
+def validar_datos_pdf(df: pd.DataFrame) -> Tuple[bool, List[str]]:
+    """
+    Valida que el DataFrame extraído del PDF tenga los datos necesarios
+    
+    Args:
+        df: DataFrame extraído del PDF
+        
+    Returns:
+        Tuple[bool, List[str]]: (es_valido, lista_errores)
+    """
+    errores = []
+    
+    # Verificar que tenga filas
+    if len(df) == 0:
+        errores.append("No se encontraron registros de asistencia")
+        return False, errores
+    
+    # Verificar columnas necesarias
+    columnas_requeridas = ['Empleado', 'Fecha', 'Entrada', 'Salida']
+    columnas_faltantes = [col for col in columnas_requeridas if col not in df.columns]
+    
+    if columnas_faltantes:
+        errores.append(f"Faltan columnas: {', '.join(columnas_faltantes)}")
+    
+    # Verificar que hay datos válidos
+    if 'Fecha' in df.columns and df['Fecha'].isna().all():
+        errores.append("No se encontraron fechas válidas")
+    
+    if 'Empleado' in df.columns and df['Empleado'].isna().all():
+        errores.append("No se encontraron nombres de empleados")
+    
+    return len(errores) == 0, errores
+
+def _calcular_confianza(linea: str, fecha_hora: Dict) -> float:
+    """Calcula la confianza de la extracción"""
+    confianza = 0.5  # Base
+    
+    # Mayor confianza si hay palabras clave
+    if any(palabra in linea.lower() for palabra in ['entrada', 'salida', 'entry', 'exit']):
+        confianza += 0.3
+    
+    # Mayor confianza si el formato de fecha es estándar
+    if re.match(r'\d{4}-\d{2}-\d{2}', fecha_hora['fecha']):
+        confianza += 0.2
+    
+    return min(confianza, 1.0)
+
+def procesar_datos_inteligente(datos_brutos: List[Dict]) -> List[Dict]:
+    """
+    Procesa los datos de manera inteligente usando el DataGrouper mejorado
+    """
+    from smart_parser import DataGrouper
+    import streamlit as st
+    
+    if not datos_brutos:
+        return []
+    
+    # Mostrar datos brutos para debugging
+    st.markdown("### Debug: Datos Extraídos del PDF")
+    for i, dato in enumerate(datos_brutos[:10]):  # Mostrar solo los primeros 10
+        st.text(f"{i+1}. {dato.get('empleado', 'N/A')} | {dato.get('fecha', 'N/A')} | {dato.get('hora', 'N/A')} | {dato.get('tipo', 'N/A')} | Línea: '{dato.get('linea_original', 'N/A')[:50]}...'")
+    
+    if len(datos_brutos) > 10:
+        st.text(f"... y {len(datos_brutos) - 10} registros más")
+    
+    # Filtrar datos por confianza
+    datos_confiables = [d for d in datos_brutos if d.get('confianza', 0) > 0.6]
+    
+    if not datos_confiables:
+        st.warning("Datos extraídos tienen baja confianza. Usando todos los datos disponibles.")
+        datos_confiables = datos_brutos
+    
+    # Usar DataGrouper para agrupar inteligentemente
+    grouper = DataGrouper()
+    datos_agrupados = grouper.agrupar_por_empleado_fecha(datos_confiables)
+    
+    # Mostrar información de agrupamiento para debugging
+    st.markdown("### Debug: Datos Agrupados")
+    for grupo in datos_agrupados:
+        debug_horas = grupo.get('Debug_Horas', [])
+        st.text(f"{grupo.get('Empleado', 'N/A')} | {grupo.get('Fecha', 'N/A')} | Entrada: {grupo.get('Entrada', 'N/A')} | Salida: {grupo.get('Salida', 'N/A')} | Debug: {debug_horas}")
+    
+    # Mostrar estadísticas de procesamiento
+    st.info(f"""
+    **Estadísticas de Procesamiento PDF:**
+    - Líneas procesadas: {len(datos_brutos)}
+    - Registros extraídos: {len(datos_confiables)}
+    - Empleados únicos: {len(set(d['empleado'] for d in datos_confiables))}
+    - Días únicos: {len(set(d['fecha'] for d in datos_confiables))}
+    - Registros finales: {len(datos_agrupados)}
+    """)
+    
+    # Verificar si hay problemas comunes
+    problemas = []
+    for grupo in datos_agrupados:
+        if not grupo.get('Entrada') and not grupo.get('Salida'):
+            problemas.append(f"{grupo.get('Empleado')} - {grupo.get('Fecha')}: No se encontraron entrada ni salida")
+        elif not grupo.get('Entrada'):
+            problemas.append(f"{grupo.get('Empleado')} - {grupo.get('Fecha')}: Falta entrada")
+        elif not grupo.get('Salida'):
+            problemas.append(f"{grupo.get('Empleado')} - {grupo.get('Fecha')}: Falta salida")
+    
+    if problemas:
+        st.markdown("### Problemas Detectados")
+        for problema in problemas:
+            st.warning(problema)
+    
+    return datos_agrupados
+
+def convertir_a_dataframe_estandar(datos_procesados: List[Dict]) -> pd.DataFrame:
+    """
+    Convierte los datos procesados al formato estándar del sistema
+    
+    Args:
+        datos_procesados: Datos procesados
+        
+    Returns:
+        DataFrame: DataFrame en formato estándar
+    """
+    if not datos_procesados:
+        return pd.DataFrame()
+    
+    # Crear DataFrame con las columnas que espera el sistema
+    df = pd.DataFrame(datos_procesados)
+    
+    # Renombrar columnas para que coincidan con el sistema existente
+    df = df.rename(columns={
+        'empleado': 'Empleado',
+        'fecha': 'Fecha',
+        'entrada': 'Entrada',
+        'salida': 'Salida'
+    })
+    
+    # Manejar valores None o faltantes
+    # Si Entrada o Salida son None, dejar el campo vacío para que la nueva funcionalidad de detección los detecte
+    df['Entrada'] = df['Entrada'].fillna('')
+    df['Salida'] = df['Salida'].fillna('')
+    
+    # Agregar columnas faltantes con valores por defecto
+    df['Descuento Inventario'] = 0
+    df['Descuento Caja'] = 0
+    df['Retiro'] = 0
+    
+    # Convertir tipos de datos
+    df['Fecha'] = pd.to_datetime(df['Fecha'])
+    
+    # Remover filas donde ambas Entrada y Salida están vacías
+    df = df[~((df['Entrada'] == '') & (df['Salida'] == ''))]
+    
+    return df
+
+def detectar_y_manejar_marcaciones_incompletas_pdf(df):
+    """
+    Detecta y maneja marcaciones incompletas específicamente para datos extraídos de PDF
+    Esta función es específica para PDFs porque puede haber casos donde la extracción
+    no sea perfecta y se necesite validación adicional
+    
+    Args:
+        df (DataFrame): DataFrame extraído del PDF
+        
+    Returns:
+        DataFrame: DataFrame con marcaciones incompletas detectadas
+    """
+    # Usar la función general de detección de marcaciones incompletas
+    from data_processor import detectar_marcaciones_incompletas
+    
+    # Primero detectar usando la función general
+    dias_incompletos = detectar_marcaciones_incompletas(df)
+    
+    # Para PDFs, agregar validaciones adicionales debido a posibles errores de extracción
+    dias_incompletos_pdf = []
+    
+    for idx, row in df.iterrows():
+        empleado = row["Empleado"]
+        fecha = pd.to_datetime(row["Fecha"])
+        entrada = row["Entrada"]
+        salida = row["Salida"]
+        
+        # Verificaciones adicionales específicas para PDFs
+        problemas_detectados = []
+        
+        # Verificar formatos de hora extraños que podrían venir del PDF
+        if entrada and str(entrada) not in ['nan', 'NaT', 'None', '']:
+            try:
+                pd.to_datetime(str(entrada))
+            except:
+                problemas_detectados.append("Entrada (formato inválido)")
+        
+        if salida and str(salida) not in ['nan', 'NaT', 'None', '']:
+            try:
+                pd.to_datetime(str(salida))
+            except:
+                problemas_detectados.append("Salida (formato inválido)")
+        
+        # Si hay problemas detectados específicos del PDF, agregarlos
+        if problemas_detectados:
+            # Verificar si ya está en la lista general
+            ya_detectado = any(d["indice"] == idx for d in dias_incompletos)
+            
+            if not ya_detectado:
+                dias_incompletos_pdf.append({
+                    "indice": idx,
+                    "empleado": empleado,
+                    "fecha": fecha.strftime("%Y-%m-%d"),
+                    "fecha_formateada": fecha.strftime("%d/%m/%Y"),
+                    "entrada": entrada if entrada and str(entrada) not in ['nan', 'NaT', 'None', ''] else None,
+                    "salida": salida if salida and str(salida) not in ['nan', 'NaT', 'None', ''] else None,
+                    "tipo_faltante": problemas_detectados,
+                    "descripcion_faltante": " y ".join(problemas_detectados),
+                    "origen": "PDF"
+                })
+    
+    # Combinar ambas listas
+    todos_incompletos = dias_incompletos + dias_incompletos_pdf
+    
+    if todos_incompletos:
+        st.markdown("""
+        <div class="custom-alert alert-warning">
+            <h4>Advertencia: Datos extraídos de PDF</h4>
+            <p>Al procesar PDFs, pueden ocurrir errores en la extracción de datos. Revisa cuidadosamente la información detectada.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    return todos_incompletos
+
+def validar_datos_pdf(df: pd.DataFrame) -> Tuple[bool, List[str]]:
+    """
+    Valida que los datos extraídos del PDF sean correctos
+    
+    Args:
+        df: DataFrame a validar
+        
+    Returns:
+        Tuple: (es_valido, lista_errores)
+    """
+    errores = []
+    
+    if df.empty:
+        errores.append("No se pudieron extraer datos del PDF")
+        return False, errores
+    
+    # Validar columnas requeridas
+    columnas_requeridas = ['Empleado', 'Fecha', 'Entrada', 'Salida']
+    for col in columnas_requeridas:
+        if col not in df.columns:
+            errores.append(f"Falta la columna: {col}")
+    
+    # Validar formatos de hora
+    for idx, row in df.iterrows():
+        try:
+            datetime.strptime(str(row['Entrada']), '%H:%M')
+        except:
+            errores.append(f"Formato de hora de entrada inválido en fila {idx + 1}: {row['Entrada']}")
+        
+        try:
+            datetime.strptime(str(row['Salida']), '%H:%M')
+        except:
+            errores.append(f"Formato de hora de salida inválido en fila {idx + 1}: {row['Salida']}")
+    
+    return len(errores) == 0, errores

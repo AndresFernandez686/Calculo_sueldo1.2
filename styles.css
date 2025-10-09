@@ -1,0 +1,592 @@
+/* Estilos personalizados para la Calculadora de Sueldos */
+
+/* Variables de colores */
+:root {
+    --primary-color: #4FC3F7;
+    --secondary-color: #81D4FA;
+    --accent-color: #29B6F6;
+    --success-color: #4CAF50;
+    --warning-color: #FF9800;
+    --error-color: #F44336;
+    --background-color: #F0F9FF;
+    --card-background: #FFFFFF;
+    --text-primary: #000000;
+    --text-secondary: #000000;
+    --border-color: #E3F2FD;
+    --border-radius: 12px;
+    --shadow: 0 4px 6px rgba(79, 195, 247, 0.1);
+}
+
+/* Fondo general */
+.stApp {
+    background: linear-gradient(135deg, #E3F2FD 0%, #F0F9FF 100%);
+    color: var(--text-primary);
+}
+
+/* Contenedor principal */
+.main-container {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin: 1rem 0;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+/* Titulo principal */
+.main-title {
+    color: #000000;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Secciones */
+.section-card {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.section-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 195, 247, 0.15);
+}
+
+/* Encabezados de seccion */
+.section-header {
+    color: #000000;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-header:before {
+    content: "📊";
+    font-size: 1.5rem;
+}
+
+/* Botones mejorados */
+.stButton > button {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 195, 247, 0.3);
+}
+
+.stDownloadButton > button {
+    background: linear-gradient(45deg, var(--success-color), #66BB6A);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.stDownloadButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+}
+
+/* Metricas mejoradas */
+.metric-card {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: scale(1.05);
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Alertas */
+.alert {
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border-left: 4px solid;
+    margin: 1rem 0;
+    font-weight: 500;
+}
+
+.alert-success {
+    border-left-color: var(--success-color);
+    background: #E8F5E8;
+    color: #000000;
+}
+
+.alert-warning {
+    border-left-color: var(--warning-color);
+    background: #FFF3E0;
+    color: #000000;
+}
+
+.alert-error {
+    border-left-color: var(--error-color);
+    background: #FFEBEE;
+    color: #000000;
+}
+
+.alert-info {
+    border-left-color: var(--primary-color);
+    background: #E3F2FD;
+    color: #000000;
+}
+
+/* Tablas mejoradas */
+.dataframe {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.dataframe table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dataframe th {
+    background-color: #F8F9FA;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.dataframe td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #E3F2FD;
+}
+
+.dataframe tr:hover td {
+    background-color: var(--background-color);
+    transition: background-color 0.3s ease;
+}
+
+/* Inputs mejorados */
+.stNumberInput > div > div > input,
+.stTextInput > div > div > input,
+.stSelectbox > div > div > select {
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    background-color: var(--card-background);
+}
+
+.stNumberInput > div > div > input:focus,
+.stTextInput > div > div > input:focus,
+.stSelectbox > div > div > select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.1);
+}
+
+/* Fecha picker mejorado */
+.stDateInput > div > div > input {
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    font-size: 1rem;
+    background-color: var(--card-background);
+}
+
+/* Verificacion detallada */
+.verification-item {
+    background: #F0F8FF;
+    border-left: 4px solid var(--primary-color);
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+.verification-value {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* Estilos especificos para seccion de verificacion */
+div[data-testid="stExpander"] {
+    background-color: #E8F5E8 !important; /* Verde claro */
+    border: 1px solid #4CAF50 !important;
+    border-radius: 8px !important;
+    margin: 1rem 0 !important;
+}
+
+div[data-testid="stExpander"] > div {
+    background-color: #E8F5E8 !important; /* Verde claro */
+    color: #000000 !important;
+}
+
+/* Contenido del expander de verificacion */
+div[data-testid="stExpander"] div[data-testid="stMarkdownContainer"] {
+    background-color: #F1F8E9 !important; /* Verde muy claro */
+    color: #000000 !important;
+    padding: 1rem !important;
+    border-radius: 4px !important;
+}
+
+/* Codigo/texto dentro de verificacion */
+div[data-testid="stExpander"] pre,
+div[data-testid="stExpander"] code {
+    background-color: #F1F8E9 !important; /* Verde muy claro */
+    color: #000000 !important;
+    border: 1px solid #C8E6C9 !important;
+    padding: 0.5rem !important;
+    border-radius: 4px !important;
+}
+
+/* Cualquier elemento con fondo negro en verificacion - cambiar a verde */
+div[data-testid="stExpander"] div[style*="background"],
+div[data-testid="stExpander"] div[class*="css-"] {
+    background-color: #E8F5E8 !important;
+    color: #000000 !important;
+}
+
+/* Elementos de texto en verificacion */
+div[data-testid="stExpander"] p,
+div[data-testid="stExpander"] span,
+div[data-testid="stExpander"] div {
+    color: #000000 !important;
+    background-color: transparent !important;
+}
+
+/* Header del expander */
+button[data-testid="stExpander"] {
+    background-color: #C8E6C9 !important; /* Verde medio */
+    color: #000000 !important;
+    border: 1px solid #4CAF50 !important;
+}
+
+/* Cualquier contenedor con fondo oscuro en la app */
+div[style*="background-color: rgb(38, 39, 48)"],
+div[style*="background-color: #262730"],
+div[style*="background: rgb(38, 39, 48)"],
+div[style*="background: #262730"] {
+    background-color: #E8F5E8 !important; /* Verde claro */
+    color: #000000 !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 1rem;
+        margin: 0.5rem 0;
+    }
+    
+    .section-card {
+        padding: 1rem;
+        margin: 0.5rem 0;
+    }
+    
+    .metric-card {
+        padding: 1rem;
+    }
+    
+    .metric-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Loading spinner personalizado */
+.custom-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-success {
+    background: var(--success-color);
+    color: white;
+}
+
+.badge-warning {
+    background: var(--warning-color);
+    color: white;
+}
+
+.badge-info {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Sidebar personalizada */
+.css-1d391kg {
+    background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+/* Header personalizado */
+.css-18e3th9 {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+/* Forzar texto negro en toda la aplicacion */
+.stApp, .stApp * {
+    color: #000000 !important;
+}
+
+/* Excepciones para botones y elementos que necesitan texto blanco */
+button, .stButton button, .stDownloadButton button {
+    color: white !important;
+}
+
+/* Asegurar que los numeros del calendario sean visibles */
+.stDateInput label, .stDateInput div, .stDateInput span {
+    color: #000000 !important;
+}
+
+/* Forzar texto negro en selectbox y otros elementos */
+.stSelectbox label, .stSelectbox div, .stSelectbox span,
+.stNumberInput label, .stNumberInput div, .stNumberInput span,
+.stTextInput label, .stTextInput div, .stTextInput span {
+    color: #000000 !important;
+}
+
+/* Cambiar fondos negros a blancos */
+.stNumberInput input, .stTextInput input, .stSelectbox select {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    border: 1px solid #E3F2FD !important;
+}
+
+/* Paneles de contenido - cambiar de negro a blanco */
+div[data-testid="stVerticalBlock"] > div {
+    background-color: #FFFFFF !important;
+}
+
+/* Widgets especificos - fondos blancos */
+div[class*="stNumberInput"] > div,
+div[class*="stSelectbox"] > div,
+div[class*="stTextInput"] > div {
+    background-color: #FFFFFF !important;
+}
+
+/* Eliminar bordes y fondos innecesarios */
+.stApp > div[data-testid="stVerticalBlock"] {
+    background-color: transparent !important;
+}
+
+/* Asegurar que todos los inputs tengan fondo blanco */
+input[type="number"], input[type="text"], select {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    border: 1px solid #E3F2FD !important;
+    border-radius: 4px !important;
+}
+
+/* Quitar separadores innecesarios */
+div[data-testid="stVerticalBlock"] > div:empty {
+    display: none !important;
+}
+
+/* Espaciado y limpieza de elementos */
+.element-container {
+    background-color: transparent !important;
+}
+
+/* Limpiar elementos especificos de Streamlit que causan paneles negros */
+.stApp div[data-testid="stForm"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E3F2FD !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+}
+
+/* Metricas con fondo blanco */
+div[data-testid="metric-container"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E3F2FD !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+}
+
+/* Eliminar fondos oscuros en contenedores */
+.stApp section[data-testid="stSidebar"] > div,
+.stApp div[class*="css-"] {
+    background-color: transparent !important;
+}
+
+/* Asegurar que los widgets tengan fondo blanco */
+.stNumberInput > div > div {
+    background-color: #FFFFFF !important;
+}
+
+.stSelectbox > div > div {
+    background-color: #FFFFFF !important;
+}
+
+/* Limpiar separadores vacios */
+div[class*="streamlit-expanderHeader"] {
+    background-color: #FFFFFF !important;
+}
+
+/* Ocultar elementos decorativos innecesarios */
+.stApp div[data-testid="stVerticalBlock"]:empty,
+.stApp div[class*="css-"]:empty {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Paneles de seleccion de archivos - colores personalizados */
+.stTabs [data-baseweb="tab"] {
+    background-color: #B3E5FC !important; /* Celeste claro */
+    color: #000000 !important;
+    border: 1px solid #4FC3F7 !important;
+    border-radius: 8px !important;
+    margin: 0 2px !important;
+    padding: 0.5rem 1rem !important;
+}
+
+.stTabs [data-baseweb="tab"]:nth-child(2) {
+    background-color: #C8E6C9 !important; /* Verde claro */
+    border: 1px solid #4CAF50 !important;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    background-color: #81D4FA !important;
+    transform: translateY(-2px) !important;
+    transition: all 0.3s ease !important;
+}
+
+.stTabs [data-baseweb="tab"]:nth-child(2):hover {
+    background-color: #A5D6A7 !important;
+}
+
+/* Paneles de carga de archivos */
+div[data-testid="stFileUploader"] {
+    background-color: #E1F5FE !important; /* Celeste muy claro */
+    border: 2px dashed #4FC3F7 !important;
+    border-radius: 12px !important;
+    padding: 2rem !important;
+    color: #000000 !important;
+}
+
+div[data-testid="stFileUploader"]:hover {
+    background-color: #B3E5FC !important;
+    border-color: #29B6F6 !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Botones de seleccion de tipo de archivo */
+.stRadio > div {
+    background-color: #F0F9FF !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    border: 1px solid #E3F2FD !important;
+}
+
+.stRadio label {
+    color: #000000 !important;
+}
+
+/* Area de arrastrar archivos - estilo mejorado */
+div[data-testid="stFileUploader"] > div {
+    background-color: #E8F5E8 !important; /* Verde muy claro para PDF */
+    color: #000000 !important;
+    text-align: center !important;
+    padding: 1.5rem !important;
+    border-radius: 8px !important;
+}
+
+/* Boton "Examinar archivos" */
+button[kind="secondary"] {
+    background-color: #4FC3F7 !important;
+    color: #000000 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 600 !important;
+}
+
+button[kind="secondary"]:hover {
+    background-color: #29B6F6 !important;
+    transform: translateY(-1px) !important;
+    transition: all 0.2s ease !important;
+}

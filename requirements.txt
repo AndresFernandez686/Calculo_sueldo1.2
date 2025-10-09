@@ -2,3 +2,7 @@ streamlit
 pandas
 matplotlib
 openpyxl
+PyPDF2
+pdfplumber
+python-dateutil
+regex
