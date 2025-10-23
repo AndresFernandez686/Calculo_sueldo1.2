@@ -29,7 +29,7 @@ def mostrar_descarga_plantilla():
     """
     st.markdown("""
     <div class="custom-alert alert-info">
-        <strong>📄 Descarga la plantilla de Excel</strong><br>
+        <strong> Descarga la plantilla de Excel</strong><br>
         Completa la plantilla con los datos de tus empleados y súbela para calcular automáticamente los sueldos.
     </div>
     """, unsafe_allow_html=True)
@@ -38,7 +38,7 @@ def mostrar_descarga_plantilla():
         st.download_button(
             "Descargar Plantilla Excel", 
             f, 
-            file_name="plantilla_sueldos_feriados_dias.xlsx",
+            file_name="plantilla_sueldo.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             help="Descarga la plantilla oficial para cargar datos de empleados"
         )
@@ -80,7 +80,7 @@ def configurar_feriados():
         st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
         if st.button("➕ Agregar", use_container_width=True):
             if len(st.session_state.feriados_list) >= 3:
-                st.error("⚠️ Máximo 3 fechas de feriados permitidas")
+                st.error("Máximo 3 fechas de feriados permitidas")
             elif fecha_seleccionada in st.session_state.feriados_list:
                 st.warning("⚠️ Esta fecha ya está agregada")
             else:
@@ -89,7 +89,7 @@ def configurar_feriados():
     
     # Mostrar feriados seleccionados con opción de eliminar
     if st.session_state.feriados_list:
-        st.markdown("### 📋 Feriados Seleccionados:")
+        st.markdown("###  Feriados Seleccionados:")
         
         for idx, fecha in enumerate(sorted(st.session_state.feriados_list)):
             col1, col2 = st.columns([4, 1])
@@ -111,7 +111,7 @@ def configurar_feriados():
     
     # Convertir lista a set para compatibilidad con el resto del código
     fechas_feriados = set(st.session_state.feriados_list)
-    opcion_feriados = "📆 Seleccionar fechas específicas"
+    opcion_feriados = " Seleccionar fechas específicas"
     cantidad_feriados = len(fechas_feriados)
     
     return opcion_feriados, fechas_feriados, cantidad_feriados
@@ -123,16 +123,16 @@ def mostrar_subida_archivo():
     Returns:
         tuple: (archivo_subido, tipo_archivo) o (lista_archivos, tipo_archivo) para PDFs
     """
-    st.markdown("### 📤 Selecciona el tipo de archivo")
+    st.markdown("###  Selecciona el tipo de archivo")
     
     # Selector de tipo de archivo con botones mejorados
     col1, col2 = st.columns(2)
     
     with col1:
-        excel_selected = st.button("📊 Archivo Excel", use_container_width=True, help="Datos estructurados tradicionales")
+        excel_selected = st.button("Archivo Excel", use_container_width=True, help="Datos estructurados tradicionales")
     
     with col2:
-        pdf_selected = st.button("📄 Archivos PDF (Hasta 2)", use_container_width=True, help="Procesamiento inteligente automático - Períodos quincenales")
+        pdf_selected = st.button(" Archivos PDF (Hasta 2)", use_container_width=True, help="Procesamiento inteligente automático - Períodos quincenales")
     
     # Mantener selección en session state
     if excel_selected:
@@ -149,7 +149,7 @@ def mostrar_subida_archivo():
     if tipo_archivo == "excel":
         st.markdown("""
         <div class="custom-alert alert-info">
-            <strong>📊 Modo Excel Tradicional</strong><br>
+            <strong>Modo Excel Tradicional</strong><br>
             Sube tu archivo Excel completado con todos los datos de empleados.
         </div>
         """, unsafe_allow_html=True)
@@ -165,15 +165,14 @@ def mostrar_subida_archivo():
     else:  # PDF
         st.markdown("""
         <div class="custom-alert alert-warning">
-            <strong>🤖 Modo Inteligente PDF Activado - Períodos Quincenales</strong><br>
+            <strong> Modo Inteligente PDF Activado - Períodos Quincenales</strong><br>
             Sube hasta 2 PDFs (uno por cada quincena). El sistema los ordenará automáticamente por fecha.
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="custom-alert alert-info">
-            <strong>💡 Tip:</strong> No importa el orden en que subas los PDFs (primera o segunda quincena). 
-            El sistema detectará las fechas y las ordenará automáticamente.
+            <strong>💡</strong> Añade por orden los PDFs (primera a segunda quincena). 
         </div>
         """, unsafe_allow_html=True)
         
@@ -188,14 +187,14 @@ def mostrar_subida_archivo():
         
         # Validar que no se suban más de 2 archivos
         if archivos and len(archivos) > 2:
-            st.error("⚠️ Máximo 2 archivos PDF permitidos (uno por cada quincena)")
+            st.error(" Máximo 2 archivos PDF permitidos (uno por cada quincena)")
             return None, "pdf"
         
         # Mostrar información de archivos subidos
         if archivos:
-            st.markdown("### 📋 Archivos Cargados:")
+            st.markdown("###  Archivos Cargados:")
             for idx, archivo in enumerate(archivos, 1):
-                st.success(f"✅ PDF {idx}: {archivo.name}")
+                st.success(f" PDF {idx}: {archivo.name}")
         
         return archivos, "pdf"
 
@@ -220,17 +219,17 @@ def mostrar_editor_registros_incompletos(df_incompletos):
     
     st.markdown("""
     <div class="custom-alert alert-warning">
-        <strong>⚠️ Registros Incompletos Detectados</strong><br>
-        Algunos empleados marcaron entrada pero no salida (o viceversa). 
+        <strong> Registros Incompletos Detectados</strong><br>
+        El empleado no marco su entrada o salida 
         Completa los datos faltantes para calcular las horas trabajadas.
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("### 🛠️ Completar Datos Faltantes")
+    st.markdown("###  Completar Datos Faltantes")
     
     st.markdown("""
     <div class="custom-alert alert-info">
-        💡 <strong>Nota:</strong> Los registros sin entrada NI salida se excluyen automáticamente 
+         <strong>Nota:</strong> Los registros sin entrada NI salida se excluyen automáticamente 
         (empleado no trabajó ese día: falta o día libre).
     </div>
     """, unsafe_allow_html=True)
@@ -242,7 +241,7 @@ def mostrar_editor_registros_incompletos(df_incompletos):
     # Mostrar cada registro incompleto
     for idx, row in df_incompletos.iterrows():
         with st.expander(
-            f"👤 {row['Empleado']} - 📅 {row['Fecha']} - ⚠️ Falta: {row['Dato_Faltante']}", 
+            f"👤 {row['Empleado']} -  {row['Fecha']} -  Falta: {row['Dato_Faltante']}", 
             expanded=True
         ):
             col1, col2, col3 = st.columns([2, 2, 1])
@@ -258,7 +257,7 @@ def mostrar_editor_registros_incompletos(df_incompletos):
                 
                 if 'Entrada' in row['Dato_Faltante']:
                     # Necesita completar entrada
-                    st.markdown("🕐 **Hora de Entrada** ⚠️ *Faltante*")
+                    st.markdown(" **Hora de Entrada** ⚠️ *Faltante*")
                     if entrada_actual in ['0:00', '00:00']:
                         st.caption(f"Valor actual: {entrada_actual} (inválido)")
                     entrada_key = f"entrada_{idx}"
@@ -271,7 +270,7 @@ def mostrar_editor_registros_incompletos(df_incompletos):
                     st.session_state.correcciones_horarios[f"{idx}_entrada"] = entrada_corregida.strftime("%H:%M")
                 else:
                     # Ya tiene entrada válida
-                    st.markdown(f"🕐 **Hora de Entrada:** {entrada_actual} ✅")
+                    st.markdown(f" **Hora de Entrada:** {entrada_actual} ")
             
             with col2:
                 # Input para Salida (considerar 0:00 como faltante)
@@ -284,7 +283,7 @@ def mostrar_editor_registros_incompletos(df_incompletos):
                 
                 if 'Salida' in row['Dato_Faltante']:
                     # Necesita completar salida
-                    st.markdown("🕔 **Hora de Salida** ⚠️ *Faltante*")
+                    st.markdown(" **Hora de Salida**  *Faltante*")
                     if salida_actual in ['0:00', '00:00']:
                         st.caption(f"Valor actual: {salida_actual} (inválido)")
                     salida_key = f"salida_{idx}"
@@ -297,18 +296,18 @@ def mostrar_editor_registros_incompletos(df_incompletos):
                     st.session_state.correcciones_horarios[f"{idx}_salida"] = salida_corregida.strftime("%H:%M")
                 else:
                     # Ya tiene salida
-                    st.markdown(f"🕔 **Hora de Salida:** {salida_actual} ✅")
+                    st.markdown(f" **Hora de Salida:** {salida_actual} ")
             
             with col3:
                 st.markdown("**Estado**")
                 if f"{idx}_entrada" in st.session_state.correcciones_horarios or f"{idx}_salida" in st.session_state.correcciones_horarios:
-                    st.success("✅ Listo")
+                    st.success(" Listo")
                 else:
-                    st.warning("⏳ Pendiente")
+                    st.warning(" Pendiente")
     
     # Botón para aplicar correcciones
     st.markdown("---")
-    if st.button("✅ Aplicar Correcciones y Continuar", type="primary", use_container_width=True):
+    if st.button(" Aplicar Correcciones y Continuar", type="primary", use_container_width=True):
         return True
     
     return False
