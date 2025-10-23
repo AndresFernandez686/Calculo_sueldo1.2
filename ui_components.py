@@ -62,7 +62,7 @@ def configurar_feriados():
         st.session_state.feriados_list = []
     
     # Mostrar selector de fecha simple
-    st.markdown("### � Agregar Fecha de Feriado")
+    st.markdown("### Agregar Fecha de Feriado")
     
     col1, col2 = st.columns([3, 1])
     
@@ -82,10 +82,10 @@ def configurar_feriados():
             if len(st.session_state.feriados_list) >= 3:
                 st.error("Máximo 3 fechas de feriados permitidas")
             elif fecha_seleccionada in st.session_state.feriados_list:
-                st.warning("⚠️ Esta fecha ya está agregada")
+                st.warning(" Esta fecha ya está agregada")
             else:
                 st.session_state.feriados_list.append(fecha_seleccionada)
-                st.success(f"✅ Feriado agregado: {fecha_seleccionada.strftime('%d/%m/%Y')}")
+                st.success(f" Feriado agregado: {fecha_seleccionada.strftime('%d/%m/%Y')}")
     
     # Mostrar feriados seleccionados con opción de eliminar
     if st.session_state.feriados_list:
@@ -96,7 +96,7 @@ def configurar_feriados():
             with col1:
                 st.markdown(f"""
                 <div class="custom-alert alert-success" style="margin: 0.2rem 0; padding: 0.8rem;">
-                    <strong>🎉 {fecha.strftime('%d/%m/%Y - %A')}</strong>
+                    <strong> {fecha.strftime('%d/%m/%Y - %A')}</strong>
                 </div>
                 """, unsafe_allow_html=True)
             with col2:
@@ -105,7 +105,7 @@ def configurar_feriados():
                     st.rerun()
         
         # Botón para limpiar todos
-        if st.button("🗑️ Limpiar Todos", help="Eliminar todas las fechas de feriados"):
+        if st.button(" Limpiar Todos", help="Eliminar todas las fechas de feriados"):
             st.session_state.feriados_list = []
             st.rerun()
     
@@ -203,7 +203,7 @@ def mostrar_editor_registros_incompletos(df_incompletos):
     """
     Muestra una interfaz para completar registros con entrada o salida faltante.
     NOTA: Solo muestra registros donde falta UNO de los dos datos.
-    Si faltan ambos, se excluyen automáticamente (no trabajó ese día).
+    Si faltan ambos, se excluyen automáticamente).
     
     Args:
         df_incompletos: DataFrame con registros incompletos (falta solo entrada o solo salida)
@@ -230,7 +230,6 @@ def mostrar_editor_registros_incompletos(df_incompletos):
     st.markdown("""
     <div class="custom-alert alert-info">
          <strong>Nota:</strong> Los registros sin entrada NI salida se excluyen automáticamente 
-        (empleado no trabajó ese día: falta o día libre).
     </div>
     """, unsafe_allow_html=True)
     
