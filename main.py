@@ -30,9 +30,9 @@ def load_css():
         with open("styles.css", encoding='utf-8') as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     except FileNotFoundError:
-        st.warning("⚠️ Archivo de estilos no encontrado. Usando estilos por defecto.")
+        st.warning(" Archivo de estilos no encontrado. Usando estilos por defecto.")
     except UnicodeDecodeError:
-        st.warning("⚠️ Error de codificación en el archivo de estilos. Usando estilos por defecto.")
+        st.warning(" Error de codificación en el archivo de estilos. Usando estilos por defecto.")
 
 # Función para mostrar el header personalizado
 def show_custom_header():
@@ -110,7 +110,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 # Sección de subida de archivo
 st.markdown('<div class="section-card fade-in-up">', unsafe_allow_html=True)
-st.markdown('<div class="section-header">📤 Subir Archivo</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header"> Subir Archivo</div>', unsafe_allow_html=True)
 uploaded_file, tipo_archivo = mostrar_subida_archivo()
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -139,7 +139,7 @@ if uploaded_file:
             validation_placeholder.empty()  # Limpiar loading de validación
 
             if not es_valido:
-                st.markdown(f'<div class="custom-alert alert-error">❌ El archivo Excel no contiene las siguientes columnas necesarias: {", ".join(columnas_faltantes)}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="custom-alert alert-error">El archivo Excel no contiene las siguientes columnas necesarias: {", ".join(columnas_faltantes)}</div>', unsafe_allow_html=True)
             else:
                 # NUEVA FUNCIONALIDAD: Detectar y corregir registros incompletos en Excel
                 from pdf_processor import detectar_registros_incompletos, filtrar_registros_sin_asistencia
@@ -157,7 +157,7 @@ if uploaded_file:
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    with st.expander("📋 Ver registros excluidos", expanded=False):
+                    with st.expander(" Ver registros excluidos", expanded=False):
                         st.dataframe(df_sin_asistencia[['Empleado', 'Fecha']], use_container_width=True)
                 
                 # Ahora detectar registros que necesitan corrección (falta solo entrada o solo salida)
@@ -178,7 +178,7 @@ if uploaded_file:
                             del st.session_state.correcciones_horarios
                     else:
                         # Detener ejecución hasta que se apliquen las correcciones
-                        st.warning("⏳ Completa los datos faltantes y presiona 'Aplicar Correcciones' para continuar")
+                        st.warning(" Completa los datos faltantes y presiona 'Aplicar Correcciones' para continuar")
                         st.stop()
                 
                 # Usar el DataFrame con asistencia para los cálculos
@@ -197,7 +197,7 @@ if uploaded_file:
                 mostrar_resultados(resultados, total_horas, total_sueldos, valor_por_hora, dias_feriados)
         except Exception as e:
             loading_placeholder.empty()
-            st.error(f"❌ Error al procesar el archivo: {str(e)}")
+            st.error(f" Error al procesar el archivo: {str(e)}")
     
     elif tipo_archivo == "pdf":
         # Procesamiento inteligente de PDF (soporta múltiples archivos)
@@ -207,7 +207,7 @@ if uploaded_file:
         archivos_pdf = uploaded_file if isinstance(uploaded_file, list) else [uploaded_file] if uploaded_file else []
         
         if not archivos_pdf:
-            st.markdown('<div class="custom-alert alert-warning">⚠️ No se han cargado archivos PDF.</div>', unsafe_allow_html=True)
+            st.markdown('<div class="custom-alert alert-warning"> No se han cargado archivos PDF.</div>', unsafe_allow_html=True)
         else:
             # Mostrar loading de PDFs
             pdf_loading_placeholder = st.empty()
@@ -223,7 +223,7 @@ if uploaded_file:
                 df_temp = procesar_pdf_a_dataframe(archivo_pdf)
                 
                 if df_temp.empty:
-                    st.warning(f"⚠️ No se pudieron extraer datos del PDF {idx}: {archivo_pdf.name}")
+                    st.warning(f" No se pudieron extraer datos del PDF {idx}: {archivo_pdf.name}")
                 else:
                     # Validar datos extraídos
                     validation_pdf_placeholder = st.empty()
@@ -234,7 +234,7 @@ if uploaded_file:
                     validation_pdf_placeholder.empty()
                     
                     if not es_valido:
-                        st.warning(f"⚠️ Errores en PDF {idx} ({archivo_pdf.name}):")
+                        st.warning(f"Errores en PDF {idx} ({archivo_pdf.name}):")
                         for error in errores:
                             st.markdown(f'<div class="custom-alert alert-warning">• {error}</div>', unsafe_allow_html=True)
                     else:
@@ -247,7 +247,7 @@ if uploaded_file:
             
             # Combinar todos los DataFrames
             if not dataframes_list:
-                st.markdown('<div class="custom-alert alert-error">❌ No se pudieron extraer datos de ningún PDF. Verifica que los archivos contengan información de asistencia.</div>', unsafe_allow_html=True)
+                st.markdown('<div class="custom-alert alert-error">No se pudieron extraer datos de ningún PDF. Verifica que los archivos contengan información de asistencia.</div>', unsafe_allow_html=True)
             else:
                 # Concatenar todos los DataFrames
                 df_combinado = pd.concat(dataframes_list, ignore_index=True)
@@ -288,7 +288,7 @@ if uploaded_file:
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    with st.expander("📋 Ver registros excluidos", expanded=False):
+                    with st.expander(" Ver registros excluidos", expanded=False):
                         st.dataframe(df_sin_asistencia[['Empleado', 'Fecha']], use_container_width=True)
                 
                 # Ahora detectar registros que necesitan corrección (falta solo entrada o solo salida)
@@ -309,7 +309,7 @@ if uploaded_file:
                             del st.session_state.correcciones_horarios
                     else:
                         # Detener ejecución hasta que se apliquen las correcciones
-                        st.warning("⏳ Completa los datos faltantes y presiona 'Aplicar Correcciones' para continuar")
+                        st.warning(" Completa los datos faltantes y presiona 'Aplicar Correcciones' para continuar")
                         st.stop()
                 
                 # Usar el DataFrame con asistencia para los cálculos
@@ -343,7 +343,7 @@ st.markdown("---")
 st.markdown('<div class="section-card fade-in-up">', unsafe_allow_html=True)
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    if st.button("🚪 Salir de la aplicación", key="exit_button"):
+    if st.button(" Salir", key="exit_button"):
         st.session_state.exit_app = True
         st.experimental_rerun()
 st.markdown('</div>', unsafe_allow_html=True)
