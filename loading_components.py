@@ -74,7 +74,6 @@ def mostrar_loading_pdf(cantidad_archivos=1):
     
     st.markdown(f"""
     <div class="processing-loader">
-        <div class="icon">📄</div>
         <div class="loading-text">{texto}</div>
         <div class="loading-subtext">{subtexto}</div>
         <div class="progress-bar-container">
@@ -89,7 +88,6 @@ def mostrar_loading_excel():
     """
     st.markdown("""
     <div class="processing-loader">
-        <div class="icon">📊</div>
         <div class="loading-text">Procesando archivo Excel</div>
         <div class="loading-subtext">Leyendo y validando datos...</div>
         <div class="progress-bar-container">
@@ -105,7 +103,7 @@ def mostrar_loading_calculos():
     st.markdown("""
     <div class="loading-container">
         <div class="loading-spinner"></div>
-        <div class="loading-text">💰 Calculando sueldos</div>
+        <div class="loading-text"> Calculando sueldos</div>
         <div class="loading-subtext">Procesando horas, feriados y descuentos...</div>
         <div class="progress-bar-container">
             <div class="progress-bar"></div>
