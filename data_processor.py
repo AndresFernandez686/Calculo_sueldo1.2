@@ -50,7 +50,7 @@ def procesar_datos_excel(df, valor_por_hora, opcion_feriados, fechas_feriados, c
                 total_sueldos += resultado_fila["sueldo"]
 
         except Exception as e:
-            st.error(f"❌ Error en la fila {idx+2}: {e}")
+            st.error(f"Error en la fila {idx+2}: {e}")
 
     return resultados, total_horas, total_sueldos
 
@@ -141,13 +141,13 @@ def mostrar_resultados(resultados, total_horas, total_sueldos, valor_por_hora=No
     # Mensaje de éxito con estilo
     st.markdown("""
     <div class="custom-alert alert-success">
-        <h3>✅ Cálculo completado exitosamente</h3>
+        <h3> Cálculo completado exitosamente</h3>
         <p>Los sueldos han sido procesados correctamente. Revisa los resultados a continuación.</p>
     </div>
     """, unsafe_allow_html=True)
     
     # Mostrar tabla con estilo
-    st.markdown("### 📊 Resultados del Cálculo")
+    st.markdown("### Resultados del Cálculo")
     st.dataframe(df_result, use_container_width=True)
 
     # Resumen visual final con métricas mejoradas
@@ -192,7 +192,7 @@ def mostrar_resultados(resultados, total_horas, total_sueldos, valor_por_hora=No
         nombre_excel = "sueldos_calculados.xlsx"
     
     st.download_button(
-        "📥 Descargar Reporte Final en Excel",
+        " Descargar Reporte Final en Excel",
         data=output.getvalue(),
         file_name=nombre_excel,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
