@@ -39,7 +39,7 @@ def procesar_pdf_a_dataframe(archivo_pdf) -> pd.DataFrame:
         return df_final
         
     except Exception as e:
-        st.error(f"❌ Error procesando PDF: {str(e)}")
+        st.error(f" Error procesando PDF: {str(e)}")
         return pd.DataFrame()
 
 def extraer_texto_pdf(archivo_pdf) -> str:
@@ -61,7 +61,7 @@ def extraer_texto_pdf(archivo_pdf) -> str:
         return texto_completo
         
     except ImportError:
-        st.warning("⚠️ pdfplumber no está instalado. Usando datos de ejemplo.")
+        st.warning(" pdfplumber no está instalado. Usando datos de ejemplo.")
         # Fallback con datos de ejemplo
         return """
         REPORTE DE ASISTENCIA - OCTUBRE 2024
@@ -84,7 +84,7 @@ def extraer_texto_pdf(archivo_pdf) -> str:
         """
         
     except Exception as e:
-        st.error(f"❌ Error extrayendo texto del PDF: {str(e)}")
+        st.error(f" Error extrayendo texto del PDF: {str(e)}")
         return ""
 
 def analizar_estructura_pdf(lineas: List[str]) -> Dict:
@@ -295,7 +295,7 @@ def procesar_datos_inteligente(datos_brutos: List[Dict]) -> List[Dict]:
     datos_confiables = [d for d in datos_brutos if d.get('confianza', 0) > 0.6]
     
     if not datos_confiables:
-        st.warning("⚠️ Datos extraídos tienen baja confianza. Usando todos los datos disponibles.")
+        st.warning(" Datos extraídos tienen baja confianza. Usando todos los datos disponibles.")
         datos_confiables = datos_brutos
     
     # Usar DataGrouper para agrupar inteligentemente
