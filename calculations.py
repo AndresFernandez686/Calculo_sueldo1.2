@@ -6,24 +6,35 @@ from datetime import datetime, timedelta
 
 def calcular_horas_especiales(entrada_dt, salida_dt):
     """
-    Calcula las horas especiales trabajadas entre 20:00 y 22:00
+    Calcula las horas normales y especiales trabajadas.
+    Horas especiales son las trabajadas entre 20:00 y 22:00
     
     Args:
         entrada_dt (datetime): Hora de entrada
         salida_dt (datetime): Hora de salida
     
     Returns:
-        float: Horas especiales trabajadas
+        tuple: (horas_normales, horas_especiales)
     """
+    # Calcular total de horas trabajadas
+    total_horas = (salida_dt - entrada_dt).total_seconds() / 3600
+    
+    # Calcular horas especiales (20:00 - 22:00)
     inicio_especial = entrada_dt.replace(hour=20, minute=0, second=0)
     fin_especial = entrada_dt.replace(hour=22, minute=0, second=0)
-    if salida_dt < entrada_dt:
-        salida_dt += timedelta(days=1)
+    
     inicio_interseccion = max(entrada_dt, inicio_especial)
     fin_interseccion = min(salida_dt, fin_especial)
+    
     if inicio_interseccion >= fin_interseccion:
-        return 0
-    return (fin_interseccion - inicio_interseccion).total_seconds() / 3600
+        horas_especiales = 0
+    else:
+        horas_especiales = (fin_interseccion - inicio_interseccion).total_seconds() / 3600
+    
+    # Horas normales = total - especiales
+    horas_normales = total_horas - horas_especiales
+    
+    return horas_normales, horas_especiales
 
 def horas_a_horasminutos(horas):
     """

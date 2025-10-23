@@ -217,7 +217,11 @@ class DataGrouper:
     
     def agrupar_por_empleado_fecha(self, datos: List[Dict]) -> List[Dict]:
         """
-        Agrupa datos por empleado y fecha, combinando entradas y salidas de manera inteligente
+        Agrupa datos por empleado y fecha, combinando entradas y salidas
+        
+        LÓGICA CORREGIDA:
+        - Primera hora del día = Entrada
+        - Segunda hora del día = Salida
         
         Args:
             datos: Lista de datos con empleado, fecha, hora, tipo
@@ -235,73 +239,42 @@ class DataGrouper:
                 grupos[clave] = {
                     'empleado': item.get('empleado', 'Unknown'),
                     'fecha': item.get('fecha', 'Unknown'),
-                    'todas_horas': [],
-                    'entradas': [],
-                    'salidas': [],
+                    'horas': [],  # Todas las horas del día
                     'registros': []
                 }
             
             grupos[clave]['registros'].append(item)
-            grupos[clave]['todas_horas'].append({
-                'hora': item.get('hora'),
-                'tipo': item.get('tipo'),
-                'linea_original': item.get('linea_original', ''),
-                'confianza': item.get('confianza', 0.5)
-            })
-            
-            if item.get('tipo') == 'Entrada':
-                grupos[clave]['entradas'].append(item.get('hora'))
-            elif item.get('tipo') == 'Salida':
-                grupos[clave]['salidas'].append(item.get('hora'))
+            grupos[clave]['horas'].append(item.get('hora'))
         
-        # Procesar grupos de manera más inteligente
+        # Procesar grupos usando lógica: primera hora = entrada, segunda = salida
         resultado = []
         for grupo in grupos.values():
-            entrada_final, salida_final = self._procesar_horarios_inteligente(grupo)
+            # Ordenar horas para asegurar el orden correcto
+            horas_ordenadas = sorted(set(grupo['horas']))  # Eliminar duplicados y ordenar
+            
+            # Primera hora = Entrada, Segunda hora = Salida
+            entrada_final = horas_ordenadas[0] if len(horas_ordenadas) >= 1 else '08:00'
+            
+            # Si solo hay UNA hora, significa que falta la salida
+            if len(horas_ordenadas) == 1:
+                salida_final = '0:00'  # Marcar como faltante
+            else:
+                salida_final = horas_ordenadas[1]  # Segunda hora
             
             resultado.append({
                 'Empleado': grupo['empleado'],
                 'Fecha': grupo['fecha'],
                 'Entrada': entrada_final,
                 'Salida': salida_final,
-                'Registros_Originales': len(grupo['registros']),
-                'Debug_Horas': [h['hora'] for h in grupo['todas_horas']]
+                'Registros_Originales': len(grupo['registros'])
             })
         
         return resultado
     
-    def _procesar_horarios_inteligente(self, grupo: Dict) -> Tuple[str, str]:
-        """
-        Procesa los horarios de manera inteligente para determinar entrada y salida
-        """
-        todas_horas = [h['hora'] for h in grupo['todas_horas'] if h['hora']]
-        
-        if not todas_horas:
-            return None, None
-        
-        # Remover duplicados y ordenar
-        horas_unicas = list(set(todas_horas))
-        horas_ordenadas = sorted(horas_unicas)
-        
-        # Si solo hay una hora, es problemático
-        if len(horas_ordenadas) == 1:
-            # Intentar determinar si es entrada o salida basado en la hora
-            hora_dt = datetime.strptime(horas_ordenadas[0], '%H:%M').time()
-            if hora_dt.hour < 14:  # Antes de las 14:00, probablemente entrada
-                return horas_ordenadas[0], None
-            else:  # Después de las 14:00, probablemente salida
-                return None, horas_ordenadas[0]
-        
-        # Si hay dos o más horas, tomar primera como entrada y última como salida
-        elif len(horas_ordenadas) >= 2:
-            return horas_ordenadas[0], horas_ordenadas[-1]
-        
-        return None, None
-    
     def _obtener_entrada_definitiva(self, entradas: List[str]) -> str:
         """Obtiene la entrada definitiva (primera del día)"""
         if not entradas:
-            return None  # Devolver None en lugar de valor por defecto
+            return '08:00'  # Por defecto
         
         # Ordenar y tomar la primera
         entradas_ordenadas = sorted(entradas)
@@ -310,7 +283,7 @@ class DataGrouper:
     def _obtener_salida_definitiva(self, salidas: List[str]) -> str:
         """Obtiene la salida definitiva (última del día)"""
         if not salidas:
-            return None  # Devolver None en lugar de valor por defecto
+            return '17:00'  # Por defecto
         
         # Ordenar y tomar la última
         salidas_ordenadas = sorted(salidas)

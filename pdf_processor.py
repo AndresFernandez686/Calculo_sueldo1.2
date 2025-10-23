@@ -39,7 +39,7 @@ def procesar_pdf_a_dataframe(archivo_pdf) -> pd.DataFrame:
         return df_final
         
     except Exception as e:
-        st.error(f"Error procesando PDF: {str(e)}")
+        st.error(f"❌ Error procesando PDF: {str(e)}")
         return pd.DataFrame()
 
 def extraer_texto_pdf(archivo_pdf) -> str:
@@ -61,7 +61,7 @@ def extraer_texto_pdf(archivo_pdf) -> str:
         return texto_completo
         
     except ImportError:
-        st.warning("pdfplumber no está instalado. Usando datos de ejemplo.")
+        st.warning("⚠️ pdfplumber no está instalado. Usando datos de ejemplo.")
         # Fallback con datos de ejemplo
         return """
         REPORTE DE ASISTENCIA - OCTUBRE 2024
@@ -84,7 +84,7 @@ def extraer_texto_pdf(archivo_pdf) -> str:
         """
         
     except Exception as e:
-        st.error(f"Error extrayendo texto del PDF: {str(e)}")
+        st.error(f"❌ Error extrayendo texto del PDF: {str(e)}")
         return ""
 
 def analizar_estructura_pdf(lineas: List[str]) -> Dict:
@@ -284,63 +284,23 @@ def _calcular_confianza(linea: str, fecha_hora: Dict) -> float:
 
 def procesar_datos_inteligente(datos_brutos: List[Dict]) -> List[Dict]:
     """
-    Procesa los datos de manera inteligente usando el DataGrouper mejorado
+    Procesa los datos de manera inteligente usando el DataGrouper
     """
     from smart_parser import DataGrouper
-    import streamlit as st
     
     if not datos_brutos:
         return []
-    
-    # Mostrar datos brutos para debugging
-    st.markdown("### Debug: Datos Extraídos del PDF")
-    for i, dato in enumerate(datos_brutos[:10]):  # Mostrar solo los primeros 10
-        st.text(f"{i+1}. {dato.get('empleado', 'N/A')} | {dato.get('fecha', 'N/A')} | {dato.get('hora', 'N/A')} | {dato.get('tipo', 'N/A')} | Línea: '{dato.get('linea_original', 'N/A')[:50]}...'")
-    
-    if len(datos_brutos) > 10:
-        st.text(f"... y {len(datos_brutos) - 10} registros más")
     
     # Filtrar datos por confianza
     datos_confiables = [d for d in datos_brutos if d.get('confianza', 0) > 0.6]
     
     if not datos_confiables:
-        st.warning("Datos extraídos tienen baja confianza. Usando todos los datos disponibles.")
+        st.warning("⚠️ Datos extraídos tienen baja confianza. Usando todos los datos disponibles.")
         datos_confiables = datos_brutos
     
     # Usar DataGrouper para agrupar inteligentemente
     grouper = DataGrouper()
     datos_agrupados = grouper.agrupar_por_empleado_fecha(datos_confiables)
-    
-    # Mostrar información de agrupamiento para debugging
-    st.markdown("### Debug: Datos Agrupados")
-    for grupo in datos_agrupados:
-        debug_horas = grupo.get('Debug_Horas', [])
-        st.text(f"{grupo.get('Empleado', 'N/A')} | {grupo.get('Fecha', 'N/A')} | Entrada: {grupo.get('Entrada', 'N/A')} | Salida: {grupo.get('Salida', 'N/A')} | Debug: {debug_horas}")
-    
-    # Mostrar estadísticas de procesamiento
-    st.info(f"""
-    **Estadísticas de Procesamiento PDF:**
-    - Líneas procesadas: {len(datos_brutos)}
-    - Registros extraídos: {len(datos_confiables)}
-    - Empleados únicos: {len(set(d['empleado'] for d in datos_confiables))}
-    - Días únicos: {len(set(d['fecha'] for d in datos_confiables))}
-    - Registros finales: {len(datos_agrupados)}
-    """)
-    
-    # Verificar si hay problemas comunes
-    problemas = []
-    for grupo in datos_agrupados:
-        if not grupo.get('Entrada') and not grupo.get('Salida'):
-            problemas.append(f"{grupo.get('Empleado')} - {grupo.get('Fecha')}: No se encontraron entrada ni salida")
-        elif not grupo.get('Entrada'):
-            problemas.append(f"{grupo.get('Empleado')} - {grupo.get('Fecha')}: Falta entrada")
-        elif not grupo.get('Salida'):
-            problemas.append(f"{grupo.get('Empleado')} - {grupo.get('Fecha')}: Falta salida")
-    
-    if problemas:
-        st.markdown("### Problemas Detectados")
-        for problema in problemas:
-            st.warning(problema)
     
     return datos_agrupados
 
@@ -368,11 +328,6 @@ def convertir_a_dataframe_estandar(datos_procesados: List[Dict]) -> pd.DataFrame
         'salida': 'Salida'
     })
     
-    # Manejar valores None o faltantes
-    # Si Entrada o Salida son None, dejar el campo vacío para que la nueva funcionalidad de detección los detecte
-    df['Entrada'] = df['Entrada'].fillna('')
-    df['Salida'] = df['Salida'].fillna('')
-    
     # Agregar columnas faltantes con valores por defecto
     df['Descuento Inventario'] = 0
     df['Descuento Caja'] = 0
@@ -381,88 +336,12 @@ def convertir_a_dataframe_estandar(datos_procesados: List[Dict]) -> pd.DataFrame
     # Convertir tipos de datos
     df['Fecha'] = pd.to_datetime(df['Fecha'])
     
-    # Remover filas donde ambas Entrada y Salida están vacías
-    df = df[~((df['Entrada'] == '') & (df['Salida'] == ''))]
-    
     return df
-
-def detectar_y_manejar_marcaciones_incompletas_pdf(df):
-    """
-    Detecta y maneja marcaciones incompletas específicamente para datos extraídos de PDF
-    Esta función es específica para PDFs porque puede haber casos donde la extracción
-    no sea perfecta y se necesite validación adicional
-    
-    Args:
-        df (DataFrame): DataFrame extraído del PDF
-        
-    Returns:
-        DataFrame: DataFrame con marcaciones incompletas detectadas
-    """
-    # Usar la función general de detección de marcaciones incompletas
-    from data_processor import detectar_marcaciones_incompletas
-    
-    # Primero detectar usando la función general
-    dias_incompletos = detectar_marcaciones_incompletas(df)
-    
-    # Para PDFs, agregar validaciones adicionales debido a posibles errores de extracción
-    dias_incompletos_pdf = []
-    
-    for idx, row in df.iterrows():
-        empleado = row["Empleado"]
-        fecha = pd.to_datetime(row["Fecha"])
-        entrada = row["Entrada"]
-        salida = row["Salida"]
-        
-        # Verificaciones adicionales específicas para PDFs
-        problemas_detectados = []
-        
-        # Verificar formatos de hora extraños que podrían venir del PDF
-        if entrada and str(entrada) not in ['nan', 'NaT', 'None', '']:
-            try:
-                pd.to_datetime(str(entrada))
-            except:
-                problemas_detectados.append("Entrada (formato inválido)")
-        
-        if salida and str(salida) not in ['nan', 'NaT', 'None', '']:
-            try:
-                pd.to_datetime(str(salida))
-            except:
-                problemas_detectados.append("Salida (formato inválido)")
-        
-        # Si hay problemas detectados específicos del PDF, agregarlos
-        if problemas_detectados:
-            # Verificar si ya está en la lista general
-            ya_detectado = any(d["indice"] == idx for d in dias_incompletos)
-            
-            if not ya_detectado:
-                dias_incompletos_pdf.append({
-                    "indice": idx,
-                    "empleado": empleado,
-                    "fecha": fecha.strftime("%Y-%m-%d"),
-                    "fecha_formateada": fecha.strftime("%d/%m/%Y"),
-                    "entrada": entrada if entrada and str(entrada) not in ['nan', 'NaT', 'None', ''] else None,
-                    "salida": salida if salida and str(salida) not in ['nan', 'NaT', 'None', ''] else None,
-                    "tipo_faltante": problemas_detectados,
-                    "descripcion_faltante": " y ".join(problemas_detectados),
-                    "origen": "PDF"
-                })
-    
-    # Combinar ambas listas
-    todos_incompletos = dias_incompletos + dias_incompletos_pdf
-    
-    if todos_incompletos:
-        st.markdown("""
-        <div class="custom-alert alert-warning">
-            <h4>Advertencia: Datos extraídos de PDF</h4>
-            <p>Al procesar PDFs, pueden ocurrir errores en la extracción de datos. Revisa cuidadosamente la información detectada.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    return todos_incompletos
 
 def validar_datos_pdf(df: pd.DataFrame) -> Tuple[bool, List[str]]:
     """
     Valida que los datos extraídos del PDF sean correctos
+    Ahora permite registros con entrada o salida faltante (incluyendo 0:00) para corrección manual
     
     Args:
         df: DataFrame a validar
@@ -482,16 +361,103 @@ def validar_datos_pdf(df: pd.DataFrame) -> Tuple[bool, List[str]]:
         if col not in df.columns:
             errores.append(f"Falta la columna: {col}")
     
-    # Validar formatos de hora
+    # Validar formatos de hora (permitir valores vacíos/NaN/0:00)
     for idx, row in df.iterrows():
-        try:
-            datetime.strptime(str(row['Entrada']), '%H:%M')
-        except:
-            errores.append(f"Formato de hora de entrada inválido en fila {idx + 1}: {row['Entrada']}")
+        # Validar entrada solo si no está vacía ni es 0:00
+        entrada_str = str(row['Entrada']).strip()
+        if pd.notna(row['Entrada']) and entrada_str != '' and entrada_str not in ['0:00', '00:00']:
+            try:
+                datetime.strptime(entrada_str, '%H:%M')
+            except:
+                errores.append(f"Formato de hora de entrada inválido en fila {idx + 1}: {row['Entrada']}")
         
-        try:
-            datetime.strptime(str(row['Salida']), '%H:%M')
-        except:
-            errores.append(f"Formato de hora de salida inválido en fila {idx + 1}: {row['Salida']}")
+        # Validar salida solo si no está vacía ni es 0:00
+        salida_str = str(row['Salida']).strip()
+        if pd.notna(row['Salida']) and salida_str != '' and salida_str not in ['0:00', '00:00']:
+            try:
+                datetime.strptime(salida_str, '%H:%M')
+            except:
+                errores.append(f"Formato de hora de salida inválido en fila {idx + 1}: {row['Salida']}")
     
     return len(errores) == 0, errores
+
+
+def detectar_registros_incompletos(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Detecta registros con entrada o salida faltante (pero no ambos).
+    Si faltan AMBOS, se considera que el empleado no trabajó ese día y se excluye.
+    Considera como "faltante": NaN, vacío, 'nan', '0:00', '00:00'
+    
+    Args:
+        df: DataFrame con datos de empleados
+        
+    Returns:
+        DataFrame: Registros con UNO de los datos faltante (necesitan corrección manual)
+    """
+    # Identificar registros incompletos (incluyendo 0:00 y 00:00)
+    entrada_faltante = (
+        df['Entrada'].isna() | 
+        (df['Entrada'] == '') | 
+        (df['Entrada'] == 'nan') |
+        (df['Entrada'].astype(str).str.strip() == '0:00') |
+        (df['Entrada'].astype(str).str.strip() == '00:00')
+    )
+    
+    salida_faltante = (
+        df['Salida'].isna() | 
+        (df['Salida'] == '') | 
+        (df['Salida'] == 'nan') |
+        (df['Salida'].astype(str).str.strip() == '0:00') |
+        (df['Salida'].astype(str).str.strip() == '00:00')
+    )
+    
+    # SOLO incluir registros donde falta UNO (no ambos)
+    # Si faltan ambos = no trabajó = excluir automáticamente
+    necesita_correccion = (entrada_faltante & ~salida_faltante) | (~entrada_faltante & salida_faltante)
+    
+    # Filtrar registros que necesitan corrección
+    df_incompletos = df[necesita_correccion].copy()
+    
+    # Agregar columna indicadora
+    df_incompletos['Dato_Faltante'] = ''
+    df_incompletos.loc[entrada_faltante, 'Dato_Faltante'] = 'Entrada'
+    df_incompletos.loc[salida_faltante, 'Dato_Faltante'] = 'Salida'
+    
+    return df_incompletos
+
+
+def filtrar_registros_sin_asistencia(df: pd.DataFrame) -> tuple:
+    """
+    Filtra y separa registros donde el empleado no trabajó (sin entrada ni salida).
+    Considera como "faltante": NaN, vacío, 'nan', '0:00', '00:00'
+    
+    Args:
+        df: DataFrame con datos de empleados
+        
+    Returns:
+        tuple: (df_con_asistencia, df_sin_asistencia)
+    """
+    # Identificar registros sin entrada ni salida (incluyendo 0:00 y 00:00)
+    entrada_faltante = (
+        df['Entrada'].isna() | 
+        (df['Entrada'] == '') | 
+        (df['Entrada'] == 'nan') |
+        (df['Entrada'].astype(str).str.strip() == '0:00') |
+        (df['Entrada'].astype(str).str.strip() == '00:00')
+    )
+    
+    salida_faltante = (
+        df['Salida'].isna() | 
+        (df['Salida'] == '') | 
+        (df['Salida'] == 'nan') |
+        (df['Salida'].astype(str).str.strip() == '0:00') |
+        (df['Salida'].astype(str).str.strip() == '00:00')
+    )
+    
+    # Registros sin asistencia (faltan ambos)
+    sin_asistencia = entrada_faltante & salida_faltante
+    
+    df_sin_asistencia = df[sin_asistencia].copy()
+    df_con_asistencia = df[~sin_asistencia].copy()
+    
+    return df_con_asistencia, df_sin_asistencia
